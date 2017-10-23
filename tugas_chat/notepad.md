@@ -3,3 +3,5 @@
 
 2. jalanin file client_chat.py + host dan portnya
 	"python client_chat.py localhost 9000"
+	
+3. tulis pesannya terus pencet enter
