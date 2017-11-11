@@ -33,8 +33,8 @@ def user_input():
                 size = os.path.getsize(path)
 
                 sock.send(('%s %d' % (msg, size)).encode())
-                with open(path, 'rb') as fuck:
-                    sock.send(fuck.read())
+                with open(path, 'rb') as f:
+                    sock.send(f.read())
                 print('File sent (%s:%d) to %s. ' % (filename, size, to))
 
             else:
@@ -48,7 +48,7 @@ while True:
 
     if request:
         if request.startswith('/username'):
-            _split = request.split(' ')
+            _split = request.split(' ',)
             username = _split[1]
             if not os.path.exists(username):
                 os.makedirs(username)
@@ -60,10 +60,10 @@ while True:
             size = int(_split[3])
             path = os.path.join(username, filename)
 
-            with open(path, 'wb') as fuck:
+            with open(path, 'wb') as f:
                 while size > 0:
                     piece = sock.recv(min(BUFFER, size))
-                    fuck.write(piece)
+                    f.write(piece)
                     size -= BUFFER
             print('%s sent a file (%s).' % (sender, filename))
 

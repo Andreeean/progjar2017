@@ -32,14 +32,14 @@ while True:
         if sock is server_socket:
             socket, address = sock.accept()
             sockets.append(socket)
-            socket.send(b'Enter your username!')
+            socket.send(b'Enter Your Username!')
         else:
             request = sock.recv(BUFFER).decode()
             print(request)
 
             if request:
                 if request.startswith('@'):
-                    _split = re.split('[@ ]', request)
+                    _split = re.split('[@ ]', request,2)
                     username = _split[1]
 
                     if username in clients.keys():
@@ -48,17 +48,17 @@ while True:
                         message = _split[2]
                         receiver.send(('%s: %s' % (sender, message)).encode())
                     else:
-                        sock.send(b'Username tidak ada cok!')
+                        sock.send(b'Username Not Found!')
 
                 elif request.startswith('/username'):
-                    username = request.split(' ')[1]
+                    username = request.split(' ',)[1]
 
                     if username not in clients.keys():
                         clients[username] = sock
                         usernames[sock] = username
                         sock.send(('/username ' + username).encode())
                     else:
-                        sock.send(b'Username udah dipake!')
+                        sock.send(b'Username Already Used!')
 
                 elif request.startswith('/file'):
                     _split = request.split(' ')
@@ -69,7 +69,7 @@ while True:
                     path = os.path.join(SERVER_MEDIA_PATH, filename)
 
                     receiver.send(('/file %s %s %d' % (sender, filename, size)).encode())
-                    with open(path, 'wb') as fuck:
+                    with open(path, 'wb') as f:
                         while size > 0:
                             piece = sock.recv(min(BUFFER, size))
                             receiver.send(piece)
