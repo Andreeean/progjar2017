@@ -1,9 +1,6 @@
 import socket as pysocket
-
 import select
-
 import re
-
 import os
 
 BUFFER = 1024

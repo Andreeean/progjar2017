@@ -1,9 +1,6 @@
 import socket
-
 import sys
-
 import threading
-
 import os
 
 BUFFER = 1024
