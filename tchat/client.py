@@ -1,10 +1,13 @@
 import socket
+
 import sys
+
 import threading
+
 import os
 
 BUFFER = 1024
-HOST = "localhost"
+HOST = "192.168.43.19"
 PORT = 65535
 
 sock = socket.socket()
@@ -45,7 +48,7 @@ while True:
 
     if request:
         if request.startswith('/username'):
-            _split = request.split(' ',)
+            _split = request.split(' ')
             username = _split[1]
             if not os.path.exists(username):
                 os.makedirs(username)
@@ -63,6 +66,9 @@ while True:
                     f.write(piece)
                     size -= BUFFER
             print('%s sent a file (%s).' % (sender, filename))
+
+        # elif request.startswith('/member'):
+        #
 
         else:
             print(request)

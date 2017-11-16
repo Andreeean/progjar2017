@@ -1,10 +1,13 @@
 import socket as pysocket
+
 import select
+
 import re
+
 import os
 
 BUFFER = 1024
-HOST = "localhost"
+HOST = "192.168.43.110"
 PORT = 65535
 SERVER_MEDIA_PATH = 'server/media'
 
@@ -46,6 +49,7 @@ while True:
                         receiver.send(('%s: %s' % (sender, message)).encode())
                     else:
                         sock.send(b'Username Not Found!')
+                        print('Username Not Found!')
 
                 elif request.startswith('/username'):
                     username = request.split(' ',)[1]
@@ -56,6 +60,7 @@ while True:
                         sock.send(('/username ' + username).encode())
                     else:
                         sock.send(b'Username Already Used!')
+                        print('Username Already Used!')
 
                 elif request.startswith('/file'):
                     _split = request.split(' ')
@@ -64,14 +69,23 @@ while True:
                     size = int(_split[3])
                     sender = usernames[sock]
                     path = os.path.join(SERVER_MEDIA_PATH, filename)
+                    if receiver not in clients:
+                        sock.send(b'Username Not Found!')
+                    else:
+                        receiver.send(('/file %s %s %d' % (sender, filename, size)).encode())
+                        with open(path, 'wb') as f:
+                            while size > 0:
+                                piece = sock.recv(min(BUFFER, size))
+                                receiver.send(piece)
+                                size -= BUFFER
+                        print('%s sent a file (%s:%d) to %s.' % (sender, filename, size, usernames[receiver]))
 
-                    receiver.send(('/file %s %s %d' % (sender, filename, size)).encode())
-                    with open(path, 'wb') as f:
-                        while size > 0:
-                            piece = sock.recv(min(BUFFER, size))
-                            receiver.send(piece)
-                            size -= BUFFER
-                    print('%s sent a file (%s:%d) to %s.' % (sender, filename, size, usernames[receiver]))
+                elif request.startswith('/member'):
+                    for x in clients:
+                        sock.send(str(x).encode())
+
+                elif request.startswith('/help'):
+                    sock.send(b'1. Mention : @[username] [pesan]\n2. Send File : /file [username] [filename]\n3. Member Online : /member\n4. Help : /help')
 
                 else:
                     for username, socket in clients.items():
