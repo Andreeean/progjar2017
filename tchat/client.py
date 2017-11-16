@@ -1,9 +1,6 @@
 import socket
-
 import sys
-
 import threading
-
 import os
 
 BUFFER = 1024
@@ -14,7 +11,6 @@ sock = socket.socket()
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.connect((HOST, PORT))
 username = None
-
 
 def user_input():
     while True:
