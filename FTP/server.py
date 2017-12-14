@@ -2,42 +2,41 @@ import socket
 import threading
 import os
 
-def retrfile(name, sock) :
-	filename = sock.recv(1024)
-	if os.path.isfile(filename):
-		print "test"
-		sock.send("EXIST " + str(os.path.getsize(filename)))
-		userresponse = sock.recv(1024)
-		if userresponse[:2] == 'OK':
-			with open(filename, 'rb') as f:
-				bytestosend = f.read(1024)
-				sock.send(bytestosend)
-				while bytestosend != "":
-					bytestosend = f.read(1024)
-					sock.send(bytestosend)
+def RetrFile(name, sock):
+    filename = sock.recv(1024)
+    if os.path.isfile(filename):
+        sock.send("EXISTS " + str(os.path.getsize(filename)))
+        userResponse = sock.recv(1024)
+        if userResponse[:2] == 'OK':
+            with open(filename, 'rb') as f:
+                bytesToSend = f.read(1024)
+                sock.send(bytesToSend)
+                while bytesToSend != "":
+                    bytesToSend = f.read(1024)
+                    sock.send(bytesToSend)
+    else:
+        sock.send("ERR ")
 
-	else:
-		sock.send("ERROR")
+    sock.close()
 
-	sock.close()
+def Main():
+    host = 'localhost'
+    port = 8080
 
-def main():
-	host = 'localhost'
-	port = 5000
 
-	s = socket.socket()
-	s.bind((host, port))
+    s = socket.socket()
+    s.bind((host,port))
 
-	s.listen(5)
+    s.listen(5)
 
-	print "Server started"
-	while True:
-		c, addr = s.accept()
-		print "Client connected ip: <" + str(addr) + ">"
-		t = threading.Thread(target=retrfile, args=("retrThread", c))
-		t.start()
-
-	s.close()
+    print "Server Started."
+    while True:
+        c, addr = s.accept()
+        print "client connedted ip:<" + str(addr) + ">"
+        t = threading.Thread(target=RetrFile, args=("RetrThread", c))
+        t.start()
+         
+    s.close()
 
 if __name__ == '__main__':
-	main()
+    Main()

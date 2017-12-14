@@ -7,7 +7,7 @@ import os
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 #proses binding
-server_address = ('localhost', 9001)
+server_address = ('localhost', 9005)
 print >>sys.stderr, 'starting up on %s port %s' % server_address
 sock.bind(server_address)
 
@@ -15,16 +15,28 @@ sock.bind(server_address)
 sock.listen(1)
 
 def response_list():
-	filegambar = os.listdir(".")
-	panjang = 255
+	listfile = os.listdir(".")
+	panjang = 755
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
 		"Content-Length: {}\r\n" \
 		"\r\n" \
-		"{}" . format(panjang, filegambar)
+		"\nLIST DIRECTORY --> /\nDOWNLOAD --> /download:(namafile)\nUPLOAD --> /upload:(namafile)\nDELETE FILE --> /delete:(namafile)\nDELETE DIRECTORY --> /deletedirect:(namadirectory)\nMOVE FILE --> /movefile:(namafile):(tujuan)\nMOVE DIRECTORY --> /movedirect:(namadirectory):(tujuan)\nADD DIRECTORY --> /adddirect:(namadirectory)\n\n\n<-DIRECTORY->\n\n" \
+		"{}". format(panjang, listfile)
 	return hasil
 
 def response_download(url):
+    method, namafile = url.split(':')
+    apakek = open (namafile,'r').read()
+    panjang = len(apakek)
+    hasil = "HTTP/1.1 200 OK\r\n" \
+		"Content-Type: multipart/form-data\r\n" \
+		"Content-Length: {}\r\n" \
+		"\r\n" \
+		"{}" . format(panjang, apakek)
+    return hasil
+    
+def response_upload(url):
     method, namafile = url.split(':')
     apakek = open (namafile,'r').read()
     panjang = len(apakek)
@@ -40,9 +52,9 @@ def response_hapus(url):
 	apakek = os.system('rm ' + namafile)
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
-		"Content-Length: 6\r\n" \
+		"Content-Length: 25\r\n" \
 		"\r\n" \
-		"SUKSES"
+		"REMOVE FILE SUCCESS!"
 	return hasil
 	
 def response_tambahdirect(url):
@@ -50,9 +62,9 @@ def response_tambahdirect(url):
 	apakek = os.system('mkdir ' + namafile)
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
-		"Content-Length: 6\r\n" \
+		"Content-Length: 25\r\n" \
 		"\r\n" \
-		"SUKSES"
+		"ADD DIRECTORY SUCCESS!"
 	return hasil
 	
 	#durung isok
@@ -61,9 +73,9 @@ def response_hapusdirect(url):
 	apakek = os.rmdir(namafile)
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
-		"Content-Length: 6\r\n" \
+		"Content-Length: 26\r\n" \
 		"\r\n" \
-		"SUKSES"
+		"REMOVE DIRECTORY SUCCESS!"
 	return hasil
 	
 def response_pindahdirect(url):
@@ -71,9 +83,9 @@ def response_pindahdirect(url):
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
-		"Content-Length: 6\r\n" \
+		"Content-Length: 25\r\n" \
 		"\r\n" \
-		"SUKSES"
+		"MOVE DIRECTORY SUCCES!"
 	return hasil
 
 def response_pindahfile(url):
@@ -81,16 +93,11 @@ def response_pindahfile(url):
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
 	hasil = "HTTP/1.1 200 OK\r\n" \
 		"Content-Type: text/plain\r\n" \
-		"Content-Length: 6\r\n" \
+		"Content-Length: 20\r\n" \
 		"\r\n" \
-		"SUKSES"
+		"MOVE FILE SUCCESS!"
 	return hasil
 
-def response_redirect():
-	hasil = "HTTP/1.1 301 Moved Permanently\r\n" \
-		"Location: {}\r\n" \
-		"\r\n"  . format('http://www.its.ac.id')
-	return hasil
 
 
 
@@ -115,6 +122,8 @@ def layani_client(koneksi_client,alamat_client):
        
        if ('/download' in url):
           respon = response_download(url)
+       elif ('/upload' in url):
+          respon = response_upload(url)
        elif ('/delete' in url):
           respon = response_hapus(url)
        elif ('/adddirect' in url):
