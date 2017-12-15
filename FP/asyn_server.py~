@@ -137,9 +137,9 @@ class ClientHandler(asyncore.dispatcher):
                 respon = response_upload()
         else:
             respon = response_list()
-        self.request_message = ""
-        self.send(respon)
-        self.close()
+            self.request_message = ""
+            self.send(respon)
+            self.close()
 
 class WebServer(asyncore.dispatcher):
     def __init__(self, host, port):

@@ -1,5 +1,3 @@
-#tian ganteng
-#ADIB LEBIH
 import socket
 import sys
 import threading
@@ -9,7 +7,7 @@ import os
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 #PROSES BINDING
-server_address = ('localhost', 9005)
+server_address = ('localhost', 9008 )
 print >>sys.stderr, 'starting up on %s port %s' % server_address
 sock.bind(server_address)
 
@@ -39,21 +37,9 @@ def response_download(url):
 		"\r\n" \
 		"{}" . format(panjang, apakek)
     return hasil
-    
-#UPLOAD
-# def response_upload(url):
-#     method, namafile = url.split(':')
-#     apakek = open (namafile,'r').read()
-#     panjang = len(apakek)
-#     hasil = "HTTP/1.1 200 OK\r\n" \
-# 		"Content-Type: multipart/form-data\r\n" \
-# 		"Content-Length: {}\r\n" \
-# 		"\r\n" \
-# 		"{}" . format(panjang, apakek)
-#     return hasil
 
 #UPLOAD
-def response_upfile():
+def response_upload():
 	page = open('pages/uploadfile.html','r').read()
 	panjang = len(page)
 	hasil = "HTTP/1.1 200 OK\r\n" \
@@ -75,7 +61,7 @@ def response_hapus(url):
 	return hasil
 
 #HAPUS FOLDER
-def response_hapus(url):
+def response_hapusdirect(url):
 	method, namafile = url.split(':')
 	apakek = os.system('rm -rf ' + namafile)
 	hasil = "HTTP/1.1 200 OK\r\n" \
@@ -97,18 +83,6 @@ def response_tambahdirect(url):
 		"ADD DIRECTORY SUCCESS!"
 	return hasil
 
-
-	
-# #BUAT HAPUS FOLDER	#SAYANG BERIBU SAYANG BELUM BERHASIL
-# def response_hapusdirect(url):
-# 	method, namafile = url.split(':')
-# 	apakek = os.rmdir(namafile)
-# 	hasil = "HTTP/1.1 200 OK\r\n" \
-# 		"Content-Type: text/plain\r\n" \
-# 		"Content-Length: 26\r\n" \
-# 		"\r\n" \
-# 		"REMOVE DIRECTORY SUCCESS!"
-# 	return hasil
 	
 #BUAT MINDAHIN FOLDER
 def response_pindahdirect(url):
@@ -143,7 +117,7 @@ def layani_client(koneksi_client,alamat_client):
            data = koneksi_client.recv(64)
 	   data = bytes.decode(data)
            request_message = request_message+data
-	   if (request_message[-4:]=="\r\n\r\n"):
+	   if (request_message[-4:]=="\r\n\r\n" or request_message[-4:]=="--\r\n"):
 		break
 
        baris = request_message.split("\r\n")
@@ -154,8 +128,6 @@ def layani_client(koneksi_client,alamat_client):
        
        if ('/download' in url):
           respon = response_download(url)
-       elif ('/upload' in url):
-          respon = response_upload(url)
        elif ('/delete' in url):
           respon = response_hapus(url)
        elif ('/adddirect' in url):
@@ -166,6 +138,19 @@ def layani_client(koneksi_client,alamat_client):
           respon = response_pindahdirect(url)
        elif ('/movefile' in url):
           respon = response_pindahfile(url)
+       elif a=="GET" and url=='/upload':
+          respon = response_upload()
+       elif a=="POST":
+          if url=="/upload":
+                length=len(baris)
+                name_file=baris[length-6]
+                name_file=name_file.split(';')
+                name_file=name_file[2]
+                a,name_file=name_file.split('=')
+                name_file=name_file.replace('"','')
+                with open('resources/'+name_file,'w+') as the_file:
+                  the_file.write(baris[length-3])
+                respon = response_upload()
        else:
           respon = response_list()
 

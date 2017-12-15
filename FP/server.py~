@@ -1,9 +1,20 @@
-import asyncore
 import socket
 import sys
 import threading
 import os
 
+#INISIALISASI
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+#PROSES BINDING
+server_address = ('localhost', 9007 )
+print >>sys.stderr, 'starting up on %s port %s' % server_address
+sock.bind(server_address)
+
+#LISTENING
+sock.listen(1)
+
+#LISTING
 def response_list():
 	listfile = os.listdir(".")
 	panjang = 755
@@ -15,6 +26,7 @@ def response_list():
 		"{}". format(panjang, listfile)
 	return hasil
 
+#DOWNLOAD
 def response_download(url):
     method, namafile = url.split(':')
     apakek = open (namafile,'r').read()
@@ -26,6 +38,7 @@ def response_download(url):
 		"{}" . format(panjang, apakek)
     return hasil
 
+#UPLOAD
 def response_upload():
 	page = open('pages/uploadfile.html','r').read()
 	panjang = len(page)
@@ -36,6 +49,7 @@ def response_upload():
 		"{}" . format(panjang, page)
 	return hasil
 
+#HAPUS FILE GANNN
 def response_hapus(url):
 	method, namafile = url.split(':')
 	apakek = os.system('rm ' + namafile)
@@ -46,6 +60,19 @@ def response_hapus(url):
 		"REMOVE FILE SUCCESS!"
 	return hasil
 
+#HAPUS FOLDER
+def response_hapusdirect(url):
+	method, namafile = url.split(':')
+	apakek = os.system('rm -rf ' + namafile)
+	hasil = "HTTP/1.1 200 OK\r\n" \
+		"Content-Type: text/plain\r\n" \
+		"Content-Length: 25\r\n" \
+		"\r\n" \
+		"REMOVE DIRECTORY SUCCESS!"
+	return hasil
+	
+
+#BIKIN FOLDER BARU
 def response_tambahdirect(url):
 	method, namafile = url.split(':')
 	apakek = os.system('mkdir ' + namafile)
@@ -56,17 +83,8 @@ def response_tambahdirect(url):
 		"ADD DIRECTORY SUCCESS!"
 	return hasil
 
-	#durung isok
-def response_hapus(url):
-	method, namafile = url.split(':')
-	apakek = os.system('rm -rf ' + namafile)
-	hasil = "HTTP/1.1 200 OK\r\n" \
-		"Content-Type: text/plain\r\n" \
-		"Content-Length: 25\r\n" \
-		"\r\n" \
-		"REMOVE DIRECTORY SUCCESS!"
-	return hasil
-
+	
+#BUAT MINDAHIN FOLDER
 def response_pindahdirect(url):
 	method, namafile, tujuan = url.split(':')
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
@@ -77,6 +95,7 @@ def response_pindahdirect(url):
 		"MOVE DIRECTORY SUCCES!"
 	return hasil
 
+#BUAT MINDAHIN FILE
 def response_pindahfile(url):
 	method, namafile, tujuan = url.split(':')
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
@@ -87,45 +106,42 @@ def response_pindahfile(url):
 		"MOVE FILE SUCCESS!"
 	return hasil
 
-class ClientHandler(asyncore.dispatcher):
-    def __init__(self, sock):
-        asyncore.dispatcher.__init__(self, sock=sock)
-        self.request_message = ""
-	self.reply_message=""
-	return
-    def handle_write(self):
-	pass
-    def handle_close(self):
-	pass
-     #fungsi melayani client
-    def handle_read(self):
-        data = self.recv(64)
-        data = bytes.decode(data)
-        self.request_message = self.request_message+data
-        if (self.request_message[-4:]=="\r\n\r\n" or request_message[-4:]=="--\r\n" ):
-            baris = self.request_message.split("\r\n")
-	    baris_request = baris[0]
-	    print baris_request
-		
-	    a,url,c = baris_request.split(" ")
-	       
+# ------------------------------------------------------------------------------------------------------------------------------
+
+#BUAT NGELAYANIN CLIENT
+def layani_client(koneksi_client,alamat_client):
+    try:
+       print >>sys.stderr, 'ada koneksi dari ', alamat_client
+       request_message = ''
+       while True:
+           data = koneksi_client.recv(64)
+	   data = bytes.decode(data)
+           request_message = request_message+data
+	   if (request_message[-4:]=="\r\n\r\n" or request_message[-4:]=="--\r\n"):
+		break
+
+       baris = request_message.split("\r\n")
+       baris_request = baris[0]
+       print baris_request
+ 	
+       a,url,c = baris_request.split(" ")
        
-        if ('/download' in url):
-            respon = response_download(url)
-        elif ('/delete' in url):
-            respon = response_hapus(url)
-        elif ('/adddirect' in url):
-            respon = response_tambahdirect(url)
-        elif ('/deletedirect' in url):
-            respon = response_hapusdirect(url)
-        elif ('/movedirect' in url):
-            respon = response_pindahdirect(url)
-        elif ('/movefile' in url):
-            respon = response_pindahfile(url)
-        elif a=="GET" and url=='/upload':
-            respon = response_upload()
-        elif a=="POST":
-            if url=="/upload":
+       if ('/download' in url):
+          respon = response_download(url)
+       elif ('/delete' in url):
+          respon = response_hapus(url)
+       elif ('/adddirect' in url):
+          respon = response_tambahdirect(url)
+       elif ('/deletedirect' in url):
+          respon = response_hapusdirect(url)
+       elif ('/movedirect' in url):
+          respon = response_pindahdirect(url)
+       elif ('/movefile' in url):
+          respon = response_pindahfile(url)
+       elif a=="GET" and url=='/upload':
+          respon = response_upload()
+       elif a=="POST":
+          if url=="/upload":
                 length=len(baris)
                 name_file=baris[length-6]
                 name_file=name_file.split(';')
@@ -133,41 +149,20 @@ class ClientHandler(asyncore.dispatcher):
                 a,name_file=name_file.split('=')
                 name_file=name_file.replace('"','')
                 with open('resources/'+name_file,'w+') as the_file:
-                    the_file.write(baris[length-3])
+                  the_file.write(baris[length-3])
                 respon = response_upload()
-        else:
-            respon = response_list()
-        self.request_message = ""
-        self.send(respon)
-        self.close()
+       else:
+          respon = response_list()
 
-class WebServer(asyncore.dispatcher):
-    def __init__(self, host, port):
-	asyncore.dispatcher.__init__(self)
-	self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-	self.set_reuse_addr()
-	self.bind((host, port))
-	self.listen(5)
-    def handle_connect(self):
-	pass
-    def handle_expt(self):
-	self.close()
-    def handle_read(self):
-	pass
-    def handle_write(self):
-	pass
-    def handle_close(self):
-	pass
-    def handle_accept(self):
-        pair = self.accept()
-        if pair is not None:
-            koneksi_client, alamat_client = pair
-            print 'Incoming connection from %s' % repr(alamat_client)
-            ClientHandler(koneksi_client)        
-	    #koneksi_client.send('haha')
-	    #koneksi_client.close()
-	    #s = threading.Thread(target=layani_client, args=(koneksi_client,alamat_client))
-	    #s.start()
+       koneksi_client.send(respon)
+    finally:
+        #CLOSE KONEKSI KALO UDAH JENUH, BOSAN, DLL
+        koneksi_client.close()
 
-server = WebServer('localhost', 8080)
-asyncore.loop()
+
+while True:
+    #NUNGGU KONEKSI DARI CLIENT, PADAHAL MENUNGGU ITU GAENAK
+    print >>sys.stderr, 'waiting for a connection'
+    koneksi_client, alamat_client = sock.accept()
+    s = threading.Thread(target=layani_client, args=(koneksi_client,alamat_client))
+    s.start()
