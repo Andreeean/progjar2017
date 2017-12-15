@@ -41,16 +41,27 @@ def response_download(url):
     return hasil
     
 #UPLOAD
-def response_upload(url):
-    method, namafile = url.split(':')
-    apakek = open (namafile,'r').read()
-    panjang = len(apakek)
-    hasil = "HTTP/1.1 200 OK\r\n" \
-		"Content-Type: multipart/form-data\r\n" \
+# def response_upload(url):
+#     method, namafile = url.split(':')
+#     apakek = open (namafile,'r').read()
+#     panjang = len(apakek)
+#     hasil = "HTTP/1.1 200 OK\r\n" \
+# 		"Content-Type: multipart/form-data\r\n" \
+# 		"Content-Length: {}\r\n" \
+# 		"\r\n" \
+# 		"{}" . format(panjang, apakek)
+#     return hasil
+
+#UPLOAD
+def response_upfile():
+	page = open('pages/uploadfile.html','r').read()
+	panjang = len(page)
+	hasil = "HTTP/1.1 200 OK\r\n" \
+		"Content-Type: text/html\r\n" \
 		"Content-Length: {}\r\n" \
 		"\r\n" \
-		"{}" . format(panjang, apakek)
-    return hasil
+		"{}" . format(panjang, page)
+	return hasil
 
 #HAPUS FILE GANNN
 def response_hapus(url):
@@ -62,7 +73,19 @@ def response_hapus(url):
 		"\r\n" \
 		"REMOVE FILE SUCCESS!"
 	return hasil
+
+#HAPUS FOLDER
+def response_hapus(url):
+	method, namafile = url.split(':')
+	apakek = os.system('rm -rf ' + namafile)
+	hasil = "HTTP/1.1 200 OK\r\n" \
+		"Content-Type: text/plain\r\n" \
+		"Content-Length: 25\r\n" \
+		"\r\n" \
+		"REMOVE DIRECTORY SUCCESS!"
+	return hasil
 	
+
 #BIKIN FOLDER BARU
 def response_tambahdirect(url):
 	method, namafile = url.split(':')
@@ -73,17 +96,19 @@ def response_tambahdirect(url):
 		"\r\n" \
 		"ADD DIRECTORY SUCCESS!"
 	return hasil
+
+
 	
-#BUAT HAPUS FOLDER	#SAYANG BERIBU SAYANG BELUM BERHASIL
-def response_hapusdirect(url):
-	method, namafile = url.split(':')
-	apakek = os.rmdir(namafile)
-	hasil = "HTTP/1.1 200 OK\r\n" \
-		"Content-Type: text/plain\r\n" \
-		"Content-Length: 26\r\n" \
-		"\r\n" \
-		"REMOVE DIRECTORY SUCCESS!"
-	return hasil
+# #BUAT HAPUS FOLDER	#SAYANG BERIBU SAYANG BELUM BERHASIL
+# def response_hapusdirect(url):
+# 	method, namafile = url.split(':')
+# 	apakek = os.rmdir(namafile)
+# 	hasil = "HTTP/1.1 200 OK\r\n" \
+# 		"Content-Type: text/plain\r\n" \
+# 		"Content-Length: 26\r\n" \
+# 		"\r\n" \
+# 		"REMOVE DIRECTORY SUCCESS!"
+# 	return hasil
 	
 #BUAT MINDAHIN FOLDER
 def response_pindahdirect(url):
