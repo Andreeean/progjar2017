@@ -1,19 +1,22 @@
+#tian ganteng
+#ADIB LEBIH
 import socket
 import sys
 import threading
 import os
 
-#inisialisasi
+#INISIALISASI
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-#proses binding
+#PROSES BINDING
 server_address = ('localhost', 9005)
 print >>sys.stderr, 'starting up on %s port %s' % server_address
 sock.bind(server_address)
 
-#listening
+#LISTENING
 sock.listen(1)
 
+#LISTING
 def response_list():
 	listfile = os.listdir(".")
 	panjang = 755
@@ -25,6 +28,7 @@ def response_list():
 		"{}". format(panjang, listfile)
 	return hasil
 
+#DOWNLOAD
 def response_download(url):
     method, namafile = url.split(':')
     apakek = open (namafile,'r').read()
@@ -36,6 +40,7 @@ def response_download(url):
 		"{}" . format(panjang, apakek)
     return hasil
     
+#UPLOAD
 def response_upload(url):
     method, namafile = url.split(':')
     apakek = open (namafile,'r').read()
@@ -47,6 +52,7 @@ def response_upload(url):
 		"{}" . format(panjang, apakek)
     return hasil
 
+#HAPUS FILE GANNN
 def response_hapus(url):
 	method, namafile = url.split(':')
 	apakek = os.system('rm ' + namafile)
@@ -57,6 +63,7 @@ def response_hapus(url):
 		"REMOVE FILE SUCCESS!"
 	return hasil
 	
+#BIKIN FOLDER BARU
 def response_tambahdirect(url):
 	method, namafile = url.split(':')
 	apakek = os.system('mkdir ' + namafile)
@@ -67,7 +74,7 @@ def response_tambahdirect(url):
 		"ADD DIRECTORY SUCCESS!"
 	return hasil
 	
-	#durung isok
+#BUAT HAPUS FOLDER	#SAYANG BERIBU SAYANG BELUM BERHASIL
 def response_hapusdirect(url):
 	method, namafile = url.split(':')
 	apakek = os.rmdir(namafile)
@@ -78,6 +85,7 @@ def response_hapusdirect(url):
 		"REMOVE DIRECTORY SUCCESS!"
 	return hasil
 	
+#BUAT MINDAHIN FOLDER
 def response_pindahdirect(url):
 	method, namafile, tujuan = url.split(':')
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
@@ -88,6 +96,7 @@ def response_pindahdirect(url):
 		"MOVE DIRECTORY SUCCES!"
 	return hasil
 
+#BUAT MINDAHIN FILE
 def response_pindahfile(url):
 	method, namafile, tujuan = url.split(':')
 	apakek = os.system('mv ' + namafile + ' ' + tujuan)
@@ -98,11 +107,9 @@ def response_pindahfile(url):
 		"MOVE FILE SUCCESS!"
 	return hasil
 
+# ------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-#fungsi melayani client
+#BUAT NGELAYANIN CLIENT
 def layani_client(koneksi_client,alamat_client):
     try:
        print >>sys.stderr, 'ada koneksi dari ', alamat_client
@@ -139,14 +146,13 @@ def layani_client(koneksi_client,alamat_client):
 
        koneksi_client.send(respon)
     finally:
-        # Clean up the connection
+        #CLOSE KONEKSI KALO UDAH JENUH, BOSAN, DLL
         koneksi_client.close()
 
 
 while True:
-    # Wait for a connection
+    #NUNGGU KONEKSI DARI CLIENT, PADAHAL MENUNGGU ITU GAENAK
     print >>sys.stderr, 'waiting for a connection'
     koneksi_client, alamat_client = sock.accept()
     s = threading.Thread(target=layani_client, args=(koneksi_client,alamat_client))
     s.start()
-
